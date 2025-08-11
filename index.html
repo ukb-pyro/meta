@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fractal Pentad — Metamorphosis × Metaphysics (Static Interactive)</title>
+<style>
+  :root{
+    --bg:#0b0d0f; --panel:#0f1216; --text:#e7efe9; --muted:#9fb0a6; --edge:#1f2326;
+    --accent:#8ee8ff; --ring:#192026; --glow:rgba(142,232,255,.15);
+    --p1:#e9d66b; /* God */
+    --p2:#f4a261; /* Animal */
+    --p3:#e76f51; /* Man */
+    --p4:#2a9d8f; /* Enterprise */
+    --p5:#4b7bec; /* Systems */
+    --i1:#ffd699; /* Play */
+    --i2:#ffb3b3; /* Ontology */
+    --i3:#b3d1ff; /* Agency */
+    --i4:#b3ffb3; /* Epistemology */
+    --i5:#d1b3ff; /* Frailty */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(1200px 800px at 20% -10%, #11161b, var(--bg));color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+  .app{display:grid;grid-template-columns:420px 1fr;gap:16px;height:100%;}
+  @media (max-width: 1100px){.app{grid-template-columns:1fr;grid-auto-rows:min-content 1fr}}
+
+  .sidebar{background:linear-gradient(180deg, #0f1419, var(--panel)); border-left:1px solid var(--edge); padding:18px 18px 24px; position:relative}
+  .sidebar h1{font-size:20px;margin:0 0 6px}
+  .sidebar .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+  .info{background:#0b0f13;border:1px solid var(--edge);border-radius:16px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .info h2{margin:0 0 6px;font-size:16px}
+  .info .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#12171c;border:1px solid var(--edge);font-size:12px;color:var(--muted);margin-right:6px}
+  .info ul{margin:8px 0 0 20px;padding:0}
+  .info li{margin:2px 0}
+  .hint{margin-top:10px;color:var(--muted);font-size:12px}
+
+  .stage{position:relative;overflow:hidden}
+  svg{width:100%;height:100%;display:block}
+
+  .node{cursor:pointer;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+  .node circle{stroke:#0a0d10;stroke-width:2}
+  .node text{font-weight:600;letter-spacing:.2px}
+  .node:hover{filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))}
+
+  .ring{fill:none;stroke:var(--ring);stroke-width:1.2}
+  .arrow{stroke:#4c5966;stroke-width:1.4;fill:none;marker-end:url(#arrowhead)}
+  .connector{stroke:var(--accent);stroke-width:1.6;opacity:.0}
+
+  .glow{filter: drop-shadow(0 0 22px var(--glow));}
+
+  /* staged entrance */
+  .fade-in{opacity:0;transform:scale(.92);animation:fadeIn .55s ease forwards}
+  .delay-1{animation-delay:.05s} .delay-2{animation-delay:.1s} .delay-3{animation-delay:.15s} .delay-4{animation-delay:.2s} .delay-5{animation-delay:.25s}
+  @keyframes fadeIn{to{opacity:1;transform:scale(1)}}
+
+  .innerHidden{opacity:0;pointer-events:none}
+  .innerShown{opacity:1;pointer-events:auto;transition:opacity .45s ease}
+
+  .legend{margin-top:14px}
+  .legend .row{display:flex;align-items:center;gap:8px;margin:8px 0}
+  .swatch{width:12px;height:12px;border-radius:3px;border:1px solid var(--edge)}
+
+  .toolbar{display:flex;gap:8px;margin-top:12px}
+  .btn{background:#12171c;border:1px solid var(--edge);color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:#2a3139}
+  .btn[aria-pressed="true"]{outline:2px solid var(--accent)}
+
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>Fractal Pentad</h1>
+      <div class="sub">Metamorphosis (#games) → Metaphysics (FEAOP)</div>
+
+      <div class="info" id="panel">
+        <h2 id="panelTitle">Metamorphosis</h2>
+        <div id="panelTags">
+          <span class="tag">Outer ring</span>
+          <span class="tag">Click a node</span>
+        </div>
+        <ul id="panelList"></ul>
+        <div class="hint">Tip: click <strong>Enterprise</strong> to reveal the nested metaphysics pentad (FEAOP) inside Ukubona.</div>
+      </div>
+
+      <div class="legend" id="legend"></div>
+      <div class="toolbar">
+        <button class="btn" id="resetBtn" title="Reset view">Reset</button>
+        <button class="btn" id="toggleConnect" aria-pressed="false" title="Show ring-to-ring connectors">Connect rings</button>
+      </div>
+    </aside>
+
+    <main class="stage" aria-label="Interactive diagram">
+      <svg viewBox="-620 -420 1240 840" role="img" aria-labelledby="title desc">
+        <title id="title">Fractal Pentad Diagram</title>
+        <desc id="desc">Outer Metamorphosis pentad with clickable nodes; inner Metaphysics pentad appears when Enterprise is selected.</desc>
+
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#4c5966" />
+          </marker>
+        </defs>
+
+        <!-- Outer ring guide -->
+        <circle class="ring" cx="0" cy="0" r="300" />
+
+        <!-- Outer arrows (clockwise) -->
+        <g id="outerArrows"></g>
+
+        <!-- Outer nodes -->
+        <g id="outerNodes"></g>
+
+        <!-- Connectors to inner ring (toggled) -->
+        <g id="connectors"></g>
+
+        <!-- Inner cluster (within Enterprise) -->
+        <g id="innerCluster" class="innerHidden">
+          <circle class="ring" cx="260" cy="0" r="125" />
+          <g id="innerArrows"></g>
+          <g id="innerNodes"></g>
+        </g>
+      </svg>
+    </main>
+  </div>
+
+<script>
+const DATA = {
+  outer: [
+    { key:"god",        label:"God",        color:"var(--p1)", detail:[
+      "Creative origin; generative principle.",
+      "Start of the game loop (metamorphosis)."
+    ]},
+    { key:"animal",     label:"Animal",     color:"var(--p2)", detail:[
+      "Instinct, sensation, pre-reflective adaptation.",
+      "What-is as lived, before naming."
+    ]},
+    { key:"man",        label:"Man",        color:"var(--p3)", detail:[
+      "Will and choice; symbolic action.",
+      "Techne and narrative planning." 
+    ]},
+    { key:"enterprise", label:"Enterprise", color:"var(--p4)", detail:[
+      "Organized coordination; institutions and scale.",
+      "Perspectivity: orchestrates nested metaphysics (Ukubona).",
+      "Click to reveal the inner pentad (FEAOP)."
+    ], nested:true},
+    { key:"systems",    label:"Systems",    color:"var(--p5)", detail:[
+      "Complex interlock; emergence and constraints.",
+      "Where limits and fragility become visible."
+    ]}
+  ],
+  inner: [
+    { key:"play",       label:"Play",       color:"var(--i1)", detail:[
+      "Tactical / Unplanned.",
+      "Afferent Dendrite 1."
+    ]},
+    { key:"ontology",   label:"Ontology",   color:"var(--i2)", detail:[
+      "Informational / Ritualized.",
+      "Afferent Dendrite 2."
+    ]},
+    { key:"agency",     label:"Agency",     color:"var(--i3)", detail:[
+      "Strategic / Planned.",
+      "Afferent Dendrite 3."
+    ]},
+    { key:"epistemology",label:"Epistemology",color:"var(--i4)", detail:[
+      "Operational / Splicing Daily Ops.",
+      "Soma → Axon → Efferent Dendrites (Trillions)."
+    ]},
+    { key:"frailty",    label:"Frailty",    color:"var(--i5)", detail:[
+      "Existential / Coordinating Other Systems.",
+      "Neurotransmitter Molecule → Cell → Tissue → Organ → System → Agent → Relation → Family → Neighbors → Community → Town → State → Nation → Region → Globe (UN, Gates)."
+    ]}
+  ]
+};
+
+const svgNS = 'http://www.w3.org/2000/svg';
+const outerNodesG = document.getElementById('outerNodes');
+const innerNodesG = document.getElementById('innerNodes');
+const innerCluster = document.getElementById('innerCluster');
+const panelTitle = document.getElementById('panelTitle');
+const panelTags  = document.getElementById('panelTags');
+const panelList  = document.getElementById('panelList');
+const legend     = document.getElementById('legend');
+const connectorsG= document.getElementById('connectors');
+const toggleConnectBtn = document.getElementById('toggleConnect');
+const resetBtn   = document.getElementById('resetBtn');
+
+function polar(n, r, startDeg=90){
+  const pts=[]; const step=360/n;
+  for(let i=0;i<n;i++){
+    const a=(startDeg+i*step)*Math.PI/180; pts.push([r*Math.cos(a), r*Math.sin(a)]);
+  }
+  return pts;
+}
+
+function makeNode({x,y,r=44,label,color,key,cls='node fade-in'}, onClick){
+  const g=document.createElementNS(svgNS,'g'); g.setAttribute('class',cls); g.setAttribute('tabindex','0'); g.setAttribute('role','button'); g.setAttribute('data-key',key);
+  const c=document.createElementNS(svgNS,'circle'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',r); c.setAttribute('fill',color); g.appendChild(c);
+  const t=document.createElementNS(svgNS,'text'); t.setAttribute('x',x); t.setAttribute('y',y+5); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','14'); t.textContent=label; g.appendChild(t);
+  g.addEventListener('click',()=>onClick(key));
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onClick(key);}});
+  return g;
+}
+
+function clear(el){while(el.firstChild) el.removeChild(el.firstChild)}
+
+function setPanel(title,tags=[],items=[]){
+  panelTitle.textContent=title;
+  panelTags.innerHTML = tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  panelList.innerHTML = items.map(li=>`<li>${li}</li>`).join('');
+}
+
+function drawLegend(){
+  const entries=[
+    {name:'God', c:'var(--p1)'}, {name:'Animal', c:'var(--p2)'}, {name:'Man', c:'var(--p3)'}, {name:'Enterprise', c:'var(--p4)'}, {name:'Systems', c:'var(--p5)'},
+    {name:'Play', c:'var(--i1)'}, {name:'Ontology', c:'var(--i2)'}, {name:'Agency', c:'var(--i3)'}, {name:'Epistemology', c:'var(--i4)'}, {name:'Frailty', c:'var(--i5)'}
+  ];
+  legend.innerHTML = entries.map(e=>`<div class="row"><span class="swatch" style="background:${e.c}"></span>${e.name}</div>`).join('');
+}
+
+function drawOuter(){
+  clear(outerNodesG); clear(document.getElementById('outerArrows'));
+  const pos=polar(5,300);
+  // arrows
+  const arrowsG=document.getElementById('outerArrows');
+  for(let i=0;i<5;i++){
+    const [x1,y1]=pos[i]; const [x2,y2]=pos[(i+1)%5];
+    const p=document.createElementNS(svgNS,'path');
+    const mx=(x1+x2)/2, my=(y1+y2)/2; // simple slight curve via quadratic
+    const cx=mx*0.9, cy=my*0.9;
+    p.setAttribute('d',`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
+    p.setAttribute('class','arrow');
+    arrowsG.appendChild(p);
+  }
+  // nodes
+  pos.forEach(([x,y],i)=>{
+    const d=DATA.outer[i];
+    const node=makeNode({x,y,r:54,label:d.label,color:`var(${d.color.replace('var(','').replace(')','')})`,key:d.key,cls:`node fade-in delay-${i+1} glow`}, onOuterClick);
+    outerNodesG.appendChild(node);
+  });
+  setPanel('Metamorphosis', ['Outer ring'], [
+    'Click a node to see details.',
+    'Click Enterprise to reveal the nested Metaphysics pentad (FEAOP).'
+  ]);
+}
+
+function drawInner(show){
+  const innerG=innerNodesG; const arrowsG=document.getElementById('innerArrows');
+  if(!show){
+    innerCluster.classList.remove('innerShown'); innerCluster.classList.add('innerHidden');
+    clear(innerG); clear(arrowsG); clear(connectorsG); toggleConnectBtn.setAttribute('aria-pressed','false'); return;
+  }
+  innerCluster.classList.remove('innerHidden'); innerCluster.classList.add('innerShown');
+  clear(innerG); clear(arrowsG);
+  const baseX=260, baseY=0; const pos=polar(5,125);
+  // arrows
+  for(let i=0;i<5;i++){
+    const [x1,y1]=pos[i]; const [x2,y2]=pos[(i+1)%5];
+    const p=document.createElementNS(svgNS,'path');
+    const X1=baseX+x1, Y1=baseY+y1, X2=baseX+x2, Y2=baseY+y2; const mx=(X1+X2)/2, my=(Y1+Y2)/2; const cx=baseX+(mx-baseX)*0.9, cy=baseY+(my-baseY)*0.9;
+    p.setAttribute('d',`M ${X1} ${Y1} Q ${cx} ${cy} ${X2} ${Y2}`);
+    p.setAttribute('class','arrow');
+    arrowsG.appendChild(p);
+  }
+  // nodes
+  pos.forEach(([x,y],i)=>{
+    const d=DATA.inner[i];
+    const node=makeNode({x:baseX+x,y:baseY+y,r:36,label:d.label,color:`var(${d.color.replace('var(','').replace(')','')})`,key:d.key,cls:`node fade-in delay-${i+1}`}, onInnerClick);
+    innerG.appendChild(node);
+  });
+}
+
+function drawConnectors(on){
+  clear(connectorsG);
+  if(!on) return;
+  // map outer to inner order (God→Play, Animal→Ontology, Man→Agency, Enterprise→Epistemology, Systems→Frailty)
+  const outerPos=polar(5,300); const innerPos=polar(5,125);
+  const baseX=260, baseY=0;
+  for(let i=0;i<5;i++){
+    const [ox,oy]=outerPos[i]; const [ix,iy]=innerPos[i];
+    const line=document.createElementNS(svgNS,'line');
+    line.setAttribute('x1',ox); line.setAttribute('y1',oy);
+    line.setAttribute('x2',baseX+ix); line.setAttribute('y2',baseY+iy);
+    line.setAttribute('class','connector');
+    connectorsG.appendChild(line);
+    requestAnimationFrame(()=>{line.style.opacity=.9})
+  }
+}
+
+function onOuterClick(key){
+  const item=DATA.outer.find(d=>d.key===key);
+  setPanel(item.label, ['Outer node'], item.detail);
+  if(key==='enterprise'){
+    drawInner(true);
+  } else {
+    drawInner(false);
+  }
+}
+
+function onInnerClick(key){
+  const item=DATA.inner.find(d=>d.key===key);
+  setPanel(`${item.label} — Metaphysics`, ['Inner node','FEAOP'], item.detail);
+}
+
+// UI controls
+resetBtn.addEventListener('click',()=>{ drawOuter(); drawInner(false); });
+
+toggleConnectBtn.addEventListener('click',()=>{
+  const pressed=toggleConnectBtn.getAttribute('aria-pressed')==='true';
+  toggleConnectBtn.setAttribute('aria-pressed', String(!pressed));
+  drawConnectors(!pressed && innerCluster.classList.contains('innerShown'));
+});
+
+// init
+drawLegend();
+drawOuter();
+</script>
+</body>
+</html>
