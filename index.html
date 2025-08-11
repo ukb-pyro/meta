@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fractal Pentad — Metamorphosis × Metaphysics (Static Interactive)</title>
+<title>Ukubona Manifesto — Fractal Ontology × Nested Epistemology</title>
 <style>
   :root{
     --bg:#0b0d0f; --panel:#0f1216; --text:#e7efe9; --muted:#9fb0a6; --edge:#1f2326;
@@ -21,19 +21,28 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:radial-gradient(1200px 800px at 20% -10%, #11161b, var(--bg));color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
-  .app{display:grid;grid-template-columns:420px 1fr;gap:16px;height:100%;}
+  body{margin:0;background:radial-gradient(1200px 800px at 20% -10%, #11161b, var(--bg));color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+  .app{display:grid;grid-template-columns:420px 1fr;gap:16px;height:100%}
   @media (max-width: 1100px){.app{grid-template-columns:1fr;grid-auto-rows:min-content 1fr}}
 
-  .sidebar{background:linear-gradient(180deg, #0f1419, var(--panel)); border-left:1px solid var(--edge); padding:18px 18px 24px; position:relative}
-  .sidebar h1{font-size:20px;margin:0 0 6px}
-  .sidebar .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
-  .info{background:#0b0f13;border:1px solid var(--edge);border-radius:16px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  .info h2{margin:0 0 6px;font-size:16px}
-  .info .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#12171c;border:1px solid var(--edge);font-size:12px;color:var(--muted);margin-right:6px}
-  .info ul{margin:8px 0 0 20px;padding:0}
-  .info li{margin:2px 0}
-  .hint{margin-top:10px;color:var(--muted);font-size:12px}
+  .sidebar{background:linear-gradient(180deg, #0f1419, var(--panel)); border-left:1px solid var(--edge); padding:18px 18px 24px}
+  .sidebar h1{font-size:20px;margin:0 0 2px}
+  .sidebar .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .box{background:#0b0f13;border:1px solid var(--edge);border-radius:16px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.35);margin-bottom:12px}
+  .box h2{margin:0 0 6px;font-size:15px}
+  .box ul{margin:8px 0 0 18px;padding:0}
+  .box li{margin:4px 0}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#12171c;border:1px solid var(--edge);font-size:12px;color:var(--muted);margin-right:6px}
+  .hint{margin-top:8px;color:var(--muted);font-size:12px}
+
+  .legend{margin-top:8px}
+  .legend .row{display:flex;align-items:center;gap:8px;margin:6px 0}
+  .swatch{width:12px;height:12px;border-radius:3px;border:1px solid var(--edge)}
+
+  .toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .btn{background:#12171c;border:1px solid var(--edge);color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:#2a3139}
+  .btn[aria-pressed="true"]{outline:2px solid var(--accent)}
 
   .stage{position:relative;overflow:hidden}
   svg{width:100%;height:100%;display:block}
@@ -46,8 +55,7 @@
   .ring{fill:none;stroke:var(--ring);stroke-width:1.2}
   .arrow{stroke:#4c5966;stroke-width:1.4;fill:none;marker-end:url(#arrowhead)}
   .connector{stroke:var(--accent);stroke-width:1.6;opacity:.0}
-
-  .glow{filter: drop-shadow(0 0 22px var(--glow));}
+  .glow{filter: drop-shadow(0 0 22px var(--glow))}
 
   /* staged entrance */
   .fade-in{opacity:0;transform:scale(.92);animation:fadeIn .55s ease forwards}
@@ -57,44 +65,62 @@
   .innerHidden{opacity:0;pointer-events:none}
   .innerShown{opacity:1;pointer-events:auto;transition:opacity .45s ease}
 
-  .legend{margin-top:14px}
-  .legend .row{display:flex;align-items:center;gap:8px;margin:8px 0}
-  .swatch{width:12px;height:12px;border-radius:3px;border:1px solid var(--edge)}
-
-  .toolbar{display:flex;gap:8px;margin-top:12px}
-  .btn{background:#12171c;border:1px solid var(--edge);color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px;cursor:pointer}
-  .btn:hover{border-color:#2a3139}
-  .btn[aria-pressed="true"]{outline:2px solid var(--accent)}
-
+  .caption{fill:var(--muted);font-weight:600;letter-spacing:.3px}
+  .caption.title{fill:var(--text);font-size:14px}
+  .caption.sub{font-size:12px}
+  .pill-bg{fill:#12171c;stroke:var(--edge);stroke-width:1}
+  .pill-text{fill:var(--text);font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar">
-      <h1>Fractal Pentad</h1>
-      <div class="sub">Metamorphosis (#games) → Metaphysics (FEAOP)</div>
+      <h1>Ukubona Manifesto</h1>
+      <div class="sub">Fractal Ontology × Nested Epistemology (at <strong>Enterprise</strong>)</div>
 
-      <div class="info" id="panel">
+      <div class="box">
+        <h2>Thesis</h2>
+        <ul>
+          <li><strong>Ontology, fractal:</strong> God → Animal → Man → Enterprise → Systems.</li>
+          <li><strong>Epistemology, nested:</strong> Enterprise is the perspectival threshold that reveals FEAOP: Play → Ontology → Agency → Epistemology → Frailty.</li>
+          <li><strong>Ukubona:</strong> an enterprise that operationalizes perspectivity in health systems.</li>
+        </ul>
+        <div class="hint">Click <strong>Enterprise</strong> in the diagram to open the inner pentad.</div>
+      </div>
+
+      <div class="box" id="panel">
         <h2 id="panelTitle">Metamorphosis</h2>
         <div id="panelTags">
           <span class="tag">Outer ring</span>
           <span class="tag">Click a node</span>
         </div>
         <ul id="panelList"></ul>
-        <div class="hint">Tip: click <strong>Enterprise</strong> to reveal the nested metaphysics pentad (FEAOP) inside Ukubona.</div>
+      </div>
+
+      <div class="box" id="frailtyBox" style="display:none">
+        <h2>Frailty — Fried Phenotype (5)</h2>
+        <ul>
+          <li>Unintentional weight loss</li>
+          <li>Exhaustion</li>
+          <li>Weakness (grip strength)</li>
+          <li>Slowness (gait speed)</li>
+          <li>Low physical activity</li>
+        </ul>
+        <div class="hint">Use this as the clinical anchor for the inner “F” node.</div>
       </div>
 
       <div class="legend" id="legend"></div>
       <div class="toolbar">
         <button class="btn" id="resetBtn" title="Reset view">Reset</button>
         <button class="btn" id="toggleConnect" aria-pressed="false" title="Show ring-to-ring connectors">Connect rings</button>
+        <button class="btn" id="toggleFrailty" aria-pressed="false" title="Show Fried criteria">Frailty details</button>
       </div>
     </aside>
 
     <main class="stage" aria-label="Interactive diagram">
-      <svg viewBox="-620 -420 1240 840" role="img" aria-labelledby="title desc">
-        <title id="title">Fractal Pentad Diagram</title>
-        <desc id="desc">Outer Metamorphosis pentad with clickable nodes; inner Metaphysics pentad appears when Enterprise is selected.</desc>
+      <svg viewBox="-640 -440 1280 880" role="img" aria-labelledby="title desc">
+        <title id="title">Fractal Ontology with Nested Epistemology</title>
+        <desc id="desc">Outer Metamorphosis pentad with clickable nodes; inner Metaphysics pentad appears when Enterprise is selected. Ukubona sits at the perspectival threshold.</desc>
 
         <defs>
           <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -104,6 +130,9 @@
 
         <!-- Outer ring guide -->
         <circle class="ring" cx="0" cy="0" r="300" />
+
+        <!-- Titles for clarity -->
+        <text x="0" y="-340" class="caption title" text-anchor="middle">Metamorphosis (Ontology)</text>
 
         <!-- Outer arrows (clockwise) -->
         <g id="outerArrows"></g>
@@ -117,8 +146,13 @@
         <!-- Inner cluster (within Enterprise) -->
         <g id="innerCluster" class="innerHidden">
           <circle class="ring" cx="260" cy="0" r="125" />
+          <text x="260" y="-160" class="caption title" text-anchor="middle">Metaphysics (Epistemology)</text>
+          <text x="260" y="-140" class="caption sub" text-anchor="middle">FEAOP: Play • Ontology • Agency • Epistemology • Frailty</text>
           <g id="innerArrows"></g>
           <g id="innerNodes"></g>
+          <!-- center pill -->
+          <rect x="206" y="-13" width="108" height="26" rx="13" class="pill-bg"></rect>
+          <text x="260" y="5" class="pill-text" text-anchor="middle">Ukubona</text>
         </g>
       </svg>
     </main>
@@ -168,7 +202,12 @@ const DATA = {
     ]},
     { key:"frailty",    label:"Frailty",    color:"var(--i5)", detail:[
       "Existential / Coordinating Other Systems.",
-      "Neurotransmitter Molecule → Cell → Tissue → Organ → System → Agent → Relation → Family → Neighbors → Community → Town → State → Nation → Region → Globe (UN, Gates)."
+      "Fried Physical Frailty Phenotype (5):",
+      "1) Unintentional weight loss",
+      "2) Exhaustion",
+      "3) Weakness (grip strength)",
+      "4) Slowness (gait speed)",
+      "5) Low physical activity"
     ]}
   ]
 };
@@ -183,6 +222,8 @@ const panelList  = document.getElementById('panelList');
 const legend     = document.getElementById('legend');
 const connectorsG= document.getElementById('connectors');
 const toggleConnectBtn = document.getElementById('toggleConnect');
+const toggleFrailtyBtn = document.getElementById('toggleFrailty');
+const frailtyBox = document.getElementById('frailtyBox');
 const resetBtn   = document.getElementById('resetBtn');
 
 function polar(n, r, startDeg=90){
@@ -226,8 +267,7 @@ function drawOuter(){
   for(let i=0;i<5;i++){
     const [x1,y1]=pos[i]; const [x2,y2]=pos[(i+1)%5];
     const p=document.createElementNS(svgNS,'path');
-    const mx=(x1+x2)/2, my=(y1+y2)/2; // simple slight curve via quadratic
-    const cx=mx*0.9, cy=my*0.9;
+    const mx=(x1+x2)/2, my=(y1+y2)/2; const cx=mx*0.9, cy=my*0.9;
     p.setAttribute('d',`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
     p.setAttribute('class','arrow');
     arrowsG.appendChild(p);
@@ -273,7 +313,6 @@ function drawInner(show){
 function drawConnectors(on){
   clear(connectorsG);
   if(!on) return;
-  // map outer to inner order (God→Play, Animal→Ontology, Man→Agency, Enterprise→Epistemology, Systems→Frailty)
   const outerPos=polar(5,300); const innerPos=polar(5,125);
   const baseX=260, baseY=0;
   for(let i=0;i<5;i++){
@@ -309,6 +348,12 @@ toggleConnectBtn.addEventListener('click',()=>{
   const pressed=toggleConnectBtn.getAttribute('aria-pressed')==='true';
   toggleConnectBtn.setAttribute('aria-pressed', String(!pressed));
   drawConnectors(!pressed && innerCluster.classList.contains('innerShown'));
+});
+
+toggleFrailtyBtn.addEventListener('click',()=>{
+  const on = toggleFrailtyBtn.getAttribute('aria-pressed')==='true';
+  toggleFrailtyBtn.setAttribute('aria-pressed', String(!on));
+  frailtyBox.style.display = on ? 'none' : 'block';
 });
 
 // init
