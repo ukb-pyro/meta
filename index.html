@@ -70,6 +70,12 @@
   .caption.sub{font-size:12px}
   .pill-bg{fill:#12171c;stroke:var(--edge);stroke-width:1}
   .pill-text{fill:var(--text);font-size:12px;font-weight:700}
+
+  /* tertiary (Frailty) micro-pentad */
+  .microHidden{opacity:0;pointer-events:none}
+  .microShown{opacity:1;pointer-events:auto;transition:opacity .35s ease}
+  .tinyNode text{font-size:10px}
+  .tinyNode circle{stroke:#0a0d10;stroke-width:1.5}
 </style>
 </head>
 <body>
@@ -106,7 +112,7 @@
           <li>Slowness (gait speed)</li>
           <li>Low physical activity</li>
         </ul>
-        <div class="hint">Use this as the clinical anchor for the inner “F” node.</div>
+        <div class="hint">This mirrors the tertiary micro-pentad that appears on the Frailty node.</div>
       </div>
 
       <div class="legend" id="legend"></div>
@@ -150,6 +156,11 @@
           <text x="260" y="-140" class="caption sub" text-anchor="middle">FEAOP: Play • Ontology • Agency • Epistemology • Frailty</text>
           <g id="innerArrows"></g>
           <g id="innerNodes"></g>
+          <!-- tertiary frailty cluster (hidden until Frailty clicked) -->
+          <g id="frailtyCluster" class="microHidden">
+            <g id="frailtyArrows"></g>
+            <g id="frailtyNodes"></g>
+          </g>
           <!-- center pill -->
           <rect x="206" y="-13" width="108" height="26" rx="13" class="pill-bg"></rect>
           <text x="260" y="5" class="pill-text" text-anchor="middle">Ukubona</text>
@@ -159,6 +170,7 @@
   </div>
 
 <script>
+// ---------------- Data ----------------
 const DATA = {
   outer: [
     { key:"god",        label:"God",        color:"var(--p1)", detail:[
@@ -171,7 +183,7 @@ const DATA = {
     ]},
     { key:"man",        label:"Man",        color:"var(--p3)", detail:[
       "Will and choice; symbolic action.",
-      "Techne and narrative planning." 
+      "Techne and narrative planning."
     ]},
     { key:"enterprise", label:"Enterprise", color:"var(--p4)", detail:[
       "Organized coordination; institutions and scale.",
@@ -198,7 +210,7 @@ const DATA = {
     ]},
     { key:"epistemology",label:"Epistemology",color:"var(--i4)", detail:[
       "Operational / Splicing Daily Ops.",
-      "Soma → Axon → Efferent Dendrites (Trillions)."
+      "Soma -> Axon -> Efferent Dendrites (Trillions)."
     ]},
     { key:"frailty",    label:"Frailty",    color:"var(--i5)", detail:[
       "Existential / Coordinating Other Systems.",
@@ -212,6 +224,16 @@ const DATA = {
   ]
 };
 
+// Tertiary micro-pentad for Frailty (Fried phenotype)
+const FRAILTY_DATA = [
+  { key:'wl', label:'Weight loss' },
+  { key:'ex', label:'Exhaustion' },
+  { key:'wk', label:'Weakness' },
+  { key:'sl', label:'Slowness' },
+  { key:'la', label:'Low activity' }
+];
+
+// ---------------- DOM refs ----------------
 const svgNS = 'http://www.w3.org/2000/svg';
 const outerNodesG = document.getElementById('outerNodes');
 const innerNodesG = document.getElementById('innerNodes');
@@ -225,7 +247,11 @@ const toggleConnectBtn = document.getElementById('toggleConnect');
 const toggleFrailtyBtn = document.getElementById('toggleFrailty');
 const frailtyBox = document.getElementById('frailtyBox');
 const resetBtn   = document.getElementById('resetBtn');
+const frailtyCluster = document.getElementById('frailtyCluster');
+const frailtyNodesG  = document.getElementById('frailtyNodes');
+const frailtyArrowsG = document.getElementById('frailtyArrows');
 
+// ---------------- Utils ----------------
 function polar(n, r, startDeg=90){
   const pts=[]; const step=360/n;
   for(let i=0;i<n;i++){
@@ -247,8 +273,8 @@ function clear(el){while(el.firstChild) el.removeChild(el.firstChild)}
 
 function setPanel(title,tags=[],items=[]){
   panelTitle.textContent=title;
-  panelTags.innerHTML = tags.map(t=>`<span class="tag">${t}</span>`).join('');
-  panelList.innerHTML = items.map(li=>`<li>${li}</li>`).join('');
+  panelTags.innerHTML = tags.map(t=>'<span class="tag">'+t+'</span>').join('');
+  panelList.innerHTML = items.map(li=>'<li>'+li+'</li>').join('');
 }
 
 function drawLegend(){
@@ -256,9 +282,10 @@ function drawLegend(){
     {name:'God', c:'var(--p1)'}, {name:'Animal', c:'var(--p2)'}, {name:'Man', c:'var(--p3)'}, {name:'Enterprise', c:'var(--p4)'}, {name:'Systems', c:'var(--p5)'},
     {name:'Play', c:'var(--i1)'}, {name:'Ontology', c:'var(--i2)'}, {name:'Agency', c:'var(--i3)'}, {name:'Epistemology', c:'var(--i4)'}, {name:'Frailty', c:'var(--i5)'}
   ];
-  legend.innerHTML = entries.map(e=>`<div class="row"><span class="swatch" style="background:${e.c}"></span>${e.name}</div>`).join('');
+  legend.innerHTML = entries.map(e=>'<div class="row"><span class="swatch" style="background:'+e.c+'"></span>'+e.name+'</div>').join('');
 }
 
+// ---------------- Draw outer ----------------
 function drawOuter(){
   clear(outerNodesG); clear(document.getElementById('outerArrows'));
   const pos=polar(5,300);
@@ -268,14 +295,14 @@ function drawOuter(){
     const [x1,y1]=pos[i]; const [x2,y2]=pos[(i+1)%5];
     const p=document.createElementNS(svgNS,'path');
     const mx=(x1+x2)/2, my=(y1+y2)/2; const cx=mx*0.9, cy=my*0.9;
-    p.setAttribute('d',`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
+    p.setAttribute('d','M '+x1+' '+y1+' Q '+cx+' '+cy+' '+x2+' '+y2);
     p.setAttribute('class','arrow');
     arrowsG.appendChild(p);
   }
   // nodes
   pos.forEach(([x,y],i)=>{
     const d=DATA.outer[i];
-    const node=makeNode({x,y,r:54,label:d.label,color:`var(${d.color.replace('var(','').replace(')','')})`,key:d.key,cls:`node fade-in delay-${i+1} glow`}, onOuterClick);
+    const node=makeNode({x,y,r:54,label:d.label,color:'var('+d.color.slice(4,-1)+')',key:d.key,cls:'node fade-in delay-'+(i+1)+' glow'}, onOuterClick);
     outerNodesG.appendChild(node);
   });
   setPanel('Metamorphosis', ['Outer ring'], [
@@ -284,32 +311,73 @@ function drawOuter(){
   ]);
 }
 
+// ---------------- Draw inner ----------------
 function drawInner(show){
   const innerG=innerNodesG; const arrowsG=document.getElementById('innerArrows');
   if(!show){
     innerCluster.classList.remove('innerShown'); innerCluster.classList.add('innerHidden');
-    clear(innerG); clear(arrowsG); clear(connectorsG); toggleConnectBtn.setAttribute('aria-pressed','false'); return;
+    clear(innerG); clear(arrowsG); clear(connectorsG);
+    frailtyCluster.classList.remove('microShown'); frailtyCluster.classList.add('microHidden');
+    clear(frailtyNodesG); clear(frailtyArrowsG);
+    toggleConnectBtn.setAttribute('aria-pressed','false');
+    return;
   }
   innerCluster.classList.remove('innerHidden'); innerCluster.classList.add('innerShown');
   clear(innerG); clear(arrowsG);
   const baseX=260, baseY=0; const pos=polar(5,125);
+  const innerPos = {};
   // arrows
   for(let i=0;i<5;i++){
     const [x1,y1]=pos[i]; const [x2,y2]=pos[(i+1)%5];
     const p=document.createElementNS(svgNS,'path');
     const X1=baseX+x1, Y1=baseY+y1, X2=baseX+x2, Y2=baseY+y2; const mx=(X1+X2)/2, my=(Y1+Y2)/2; const cx=baseX+(mx-baseX)*0.9, cy=baseY+(my-baseY)*0.9;
-    p.setAttribute('d',`M ${X1} ${Y1} Q ${cx} ${cy} ${X2} ${Y2}`);
+    p.setAttribute('d','M '+X1+' '+Y1+' Q '+cx+' '+cy+' '+X2+' '+Y2);
     p.setAttribute('class','arrow');
     arrowsG.appendChild(p);
   }
   // nodes
+  const keys=['play','ontology','agency','epistemology','frailty'];
   pos.forEach(([x,y],i)=>{
     const d=DATA.inner[i];
-    const node=makeNode({x:baseX+x,y:baseY+y,r:36,label:d.label,color:`var(${d.color.replace('var(','').replace(')','')})`,key:d.key,cls:`node fade-in delay-${i+1}`}, onInnerClick);
+    const absX=baseX+x, absY=baseY+y; innerPos[keys[i]] = [absX, absY];
+    const node=makeNode({x:absX,y:absY,r:36,label:d.label,color:'var('+d.color.slice(4,-1)+')',key:d.key,cls:'node fade-in delay-'+(i+1)}, onInnerClick);
     innerG.appendChild(node);
   });
+  window.__innerPos = innerPos; // store for tertiary placement
 }
 
+// ---------------- Draw tertiary (Frailty) ----------------
+function drawFrailty(show){
+  clear(frailtyNodesG); clear(frailtyArrowsG);
+  if(!show){
+    frailtyCluster.classList.remove('microShown'); frailtyCluster.classList.add('microHidden');
+    return;
+  }
+  const fp = (window.__innerPos && window.__innerPos['frailty']) || [260,0];
+  const [cx, cy] = fp;
+  const r = 55; // micro ring radius
+  const pos = polar(5, r);
+  // tiny arrows
+  for(let i=0;i<5;i++){
+    const [x1,y1]=pos[i]; const [x2,y2]=pos[(i+1)%5];
+    const p=document.createElementNS(svgNS,'path');
+    const X1=cx+x1, Y1=cy+y1, X2=cx+x2, Y2=cy+y2; const mx=(X1+X2)/2, my=(Y1+Y2)/2; const cx2=cx+(mx-cx)*0.9, cy2=cy+(my-cy)*0.9;
+    p.setAttribute('d','M '+X1+' '+Y1+' Q '+cx2+' '+cy2+' '+X2+' '+Y2);
+    p.setAttribute('class','arrow');
+    frailtyArrowsG.appendChild(p);
+  }
+  // tiny nodes
+  pos.forEach(([x,y],i)=>{
+    const d = FRAILTY_DATA[i];
+    const g=document.createElementNS(svgNS,'g'); g.setAttribute('class','node tinyNode fade-in');
+    const c=document.createElementNS(svgNS,'circle'); c.setAttribute('cx', cx+x); c.setAttribute('cy', cy+y); c.setAttribute('r', 20); c.setAttribute('fill', 'var(--i5)'); g.appendChild(c);
+    const t=document.createElementNS(svgNS,'text'); t.setAttribute('x', cx+x); t.setAttribute('y', cy+y+3); t.setAttribute('text-anchor','middle'); t.textContent=d.label; g.appendChild(t);
+    frailtyNodesG.appendChild(g);
+  });
+  frailtyCluster.classList.remove('microHidden'); frailtyCluster.classList.add('microShown');
+}
+
+// ---------------- Connectors ----------------
 function drawConnectors(on){
   clear(connectorsG);
   if(!on) return;
@@ -322,10 +390,11 @@ function drawConnectors(on){
     line.setAttribute('x2',baseX+ix); line.setAttribute('y2',baseY+iy);
     line.setAttribute('class','connector');
     connectorsG.appendChild(line);
-    requestAnimationFrame(()=>{line.style.opacity=.9})
+    requestAnimationFrame(()=>{line.style.opacity=.9});
   }
 }
 
+// ---------------- Handlers ----------------
 function onOuterClick(key){
   const item=DATA.outer.find(d=>d.key===key);
   setPanel(item.label, ['Outer node'], item.detail);
@@ -338,10 +407,15 @@ function onOuterClick(key){
 
 function onInnerClick(key){
   const item=DATA.inner.find(d=>d.key===key);
-  setPanel(`${item.label} — Metaphysics`, ['Inner node','FEAOP'], item.detail);
+  setPanel(item.label + ' - Metaphysics', ['Inner node','FEAOP'], item.detail);
+  if(key==='frailty'){
+    drawFrailty(true);
+  } else {
+    drawFrailty(false);
+  }
 }
 
-// UI controls
+// ---------------- UI controls ----------------
 resetBtn.addEventListener('click',()=>{ drawOuter(); drawInner(false); });
 
 toggleConnectBtn.addEventListener('click',()=>{
@@ -356,9 +430,29 @@ toggleFrailtyBtn.addEventListener('click',()=>{
   frailtyBox.style.display = on ? 'none' : 'block';
 });
 
+// ---------------- Init + lightweight self-test ----------------
+function runSelfTests(){
+  const errors=[];
+  if(!outerNodesG) errors.push('outerNodes group missing');
+  if(!innerNodesG) errors.push('innerNodes group missing');
+  if(typeof drawOuter!=="function") errors.push('drawOuter missing');
+  if(typeof drawInner!=="function") errors.push('drawInner missing');
+  if(typeof drawFrailty!=="function") errors.push('drawFrailty missing');
+  if(errors.length){
+    console.error('[Manifesto self-test] FAIL:', errors.join('; '));
+  } else {
+    console.log('[Manifesto self-test] OK');
+  }
+}
+
 // init
-drawLegend();
-drawOuter();
+try{
+  drawLegend();
+  drawOuter();
+  runSelfTests();
+}catch(e){
+  console.error('Init error:', e);
+}
 </script>
 </body>
 </html>
